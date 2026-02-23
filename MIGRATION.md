@@ -19,7 +19,7 @@ python graph_refactored.py
 ### 2. Configuration
 **Before:** Hardcoded in `graph.py` line 133
 ```python
-"access_token": "glpat-T6WPONMOt5T_l8julUwSIW86MQp1OmgydHRjCw.01.120rj6duu"
+"access_token": "glpat-T**********u"
 ```
 
 **After:** Environment variable in `.env`
@@ -60,17 +60,20 @@ initial_state = {
 }
 ```
 
-### 5. OWASP Category 10
-**Before:** "Mishandling of Exceptional Conditions"
+### 5. OWASP Category Alignment
+**Before:** Categories were misaligned with official OWASP Top 10 2021
 ```python
-def v10_expt_mishandle(state: VAPTState):
-    vulnerability = "Mishandling of Exceptional Conditions"
+v2 = "Security Misconfiguration"
+v3 = "Software Supply Chain Failures"
+v6 = "Insecure Design"
 ```
 
-**After:** "Server-Side Request Forgery (SSRF)"
+**After:** Official OWASP 2021 naming and order
 ```python
-# v10 now analyzes SSRF vulnerabilities (OWASP 2025 aligned)
-v10_ssrf = create_owasp_node("v10")
+v2 = "A02:2021 – Cryptographic Failures"
+v3 = "A03:2021 – Injection"
+v6 = "A06:2021 – Vulnerable and Outdated Components"
+# See https://owasp.org/Top10/
 ```
 
 ## Step-by-Step Migration
@@ -114,8 +117,8 @@ Check:
 | Duplicate node code | ✅ 10 functions | ❌ 1 factory |
 | State validation | ❌ None | ✅ Runtime checks |
 | Audit logging | ❌ None | ✅ Full traceability |
-| OWASP Category 10 | Exception handling | SSRF |
-| Ollama config | Hardcoded (OK) | Centralized (same IP) |
+| OWASP alignment | Partial | Official 2021 |
+| Ollama config | Hardcoded | Env configurable |
 | Structured output | ❌ Free text | ✅ JSON + text |
 | Deterministic scans | ❌ None | ✅ Optional |
 

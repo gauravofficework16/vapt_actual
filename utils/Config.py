@@ -14,11 +14,12 @@ load_dotenv()
 class Config:
     """Production-ready configuration with validation."""
     
-    # ==================== Ollama Settings (Fixed as per requirement) ====================
-    OLLAMA_IP: str = "172.17.63.4"
-    OLLAMA_PORT: str = "11434"
-    OLLAMA_MODEL: str = "gpt-oss:20b"
-    OLLAMA_TIMEOUT: int = 300
+    # ==================== Ollama Settings (Configurable) ====================
+    # Can be overridden via environment variables for different network setups
+    OLLAMA_IP: str = os.getenv("OLLAMA_IP", "172.17.63.4")
+    OLLAMA_PORT: str = os.getenv("OLLAMA_PORT", "11434")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
+    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "300"))
     
     @classmethod
     def get_ollama_base_url(cls) -> str:

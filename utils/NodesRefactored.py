@@ -123,11 +123,11 @@ If NO vulnerabilities are found, clearly state: "No {vulnerability} issues detec
 
 # ==================== Create All 10 OWASP Nodes ====================
 v1_bac = create_owasp_node("v1")
-v2_misconfig = create_owasp_node("v2")
-v3_supply_chain = create_owasp_node("v3")
-v4_crypto = create_owasp_node("v4")
-v5_injection = create_owasp_node("v5")
-v6_insecure_design = create_owasp_node("v6")
+v2_crypto = create_owasp_node("v2")
+v3_injection = create_owasp_node("v3")
+v4_insecure_design = create_owasp_node("v4")
+v5_misconfig = create_owasp_node("v5")
+v6_components = create_owasp_node("v6")
 v7_auth_fail = create_owasp_node("v7")
 v8_integrity_fail = create_owasp_node("v8")
 v9_logging_fail = create_owasp_node("v9")

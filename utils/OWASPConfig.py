@@ -1,5 +1,6 @@
 """
-OWASP Top 10 (2025-aligned) vulnerability categories and analysis prompts.
+"""OWASP Top 10 2021 (Official) vulnerability categories and analysis prompts.
+Aligned with https://owasp.org/Top10/
 Centralized configuration for consistent analysis across all nodes.
 """
 
@@ -7,6 +8,7 @@ OWASP_CATEGORIES = [
     {
         "id": "v1",
         "name": "Broken Access Control",
+        "owasp_id": "A01:2021",
         "key": "v1_bac",
         "output_file": "rv1.md",
         "focus_areas": [
@@ -31,111 +33,125 @@ OWASP_CATEGORIES = [
     },
     {
         "id": "v2",
-        "name": "Security Misconfiguration",
-        "key": "v2_misconfig",
+        "name": "Cryptographic Failures",
+        "owasp_id": "A02:2021",
+        "key": "v2_crypto",
         "output_file": "rv2.md",
         "focus_areas": [
-            "Unnecessary features enabled (ports, services, accounts, testing frameworks)",
-            "Insecure Error Handling (Information Leakage)",
-            "Missing or Weak Security Headers",
-            "Hardcoded Secrets and Default Credentials",
-            "Enabled Directory Browsing",
-            "Insecure Framework Defaults (e.g., DEBUG mode)",
-            "Permissive Cloud Access (open S3, SSH ports)"
+            "Use of Broken or Deprecated Algorithms (MD5, SHA1, DES, RC4)",
+            "Hardcoded Cryptographic Keys and Secrets",
+            "Insecure Modes of Operation (ECB mode)",
+            "Predictable Random Number Generators for Security",
+            "Weak Password Hashing (missing salt, fast hashes)",
+            "Transmitting sensitive data in clear text"
         ],
         "analysis_instructions": """
-1. Check for unnecessary features enabled or installed.
-2. Check Insecure Error Handling that leaks internal information.
-3. Verify presence of security headers: CSP, HSTS, X-Content-Type-Options, X-Frame-Options.
-4. Check for Hardcoded Secrets and Default Credentials in code or config files.
-5. Check if Directory Browsing is enabled.
-6. Check Insecure Framework Defaults (e.g., Django DEBUG = True).
-7. Check Permissive Cloud Access configurations (S3 buckets, SSH ports open to 0.0.0.0/0).
+1. Identify use of outdated or weak cryptographic functions (MD5, SHA1, DES, RC4).
+2. Detect hardcoded secrets, private keys, or passwords in source code.
+3. Spot use of insecure block cipher modes like ECB (Electronic Codebook).
+4. Identify use of non-cryptographic PRNGs for security-sensitive operations.
+5. Detect weak password hashing (no salt, fast functions instead of Argon2/bcrypt/PBKDF2).
+6. Check for sensitive data transmitted or stored without encryption.
 """
     },
     {
         "id": "v3",
-        "name": "Software Supply Chain Failures",
-        "key": "v3_supply_chain",
+        "name": "Injection",
+        "owasp_id": "A03:2021",
+        "key": "v3_injection",
         "output_file": "rv3.md",
         "focus_areas": [
-            "Use of Unmaintained Third Party Components",
-            "Dependency on Vulnerable Third-Party Component",
-            "Reliance on Component That is Not Updateable",
-            "Unsupported or outdated components (web server, runtime, libraries)",
-            "Outdated or unstable library versions"
+            "SQL Injection via String Concatenation",
+            "Direct Execution of OS Commands with User Input",
+            "Unsafe ORM Parameterization",
+            "Dynamic SQL in Stored Procedures",
+            "NoSQL Injection",
+            "Lack of Context-Aware Input Validation and Escaping"
         ],
         "analysis_instructions": """
-1. Check Use of Unmaintained Third Party Components and Dependency on Vulnerable Components.
-2. Identify Reliance on Components That are Not Updateable.
-3. Check vulnerability of unsupported, or out of date web/application server, APIs, runtime environments.
-4. Try to understand library versions from usage or requirements.txt/package.json files.
-5. Flag outdated or unstable library versions.
+1. Identify where user-supplied variables are concatenated directly into SQL/NoSQL queries.
+2. Spot instances where raw user input is passed to system commands (exec, shell, eval).
+3. Detect use of unsanitized data within ORM search parameters or HQL/JPQL.
+4. Identify stored procedures using dynamic SQL built from untrusted input.
+5. Check for NoSQL injection vulnerabilities in MongoDB, Cassandra queries.
+6. Detect data flows where untrusted input reaches interpreters without validation/escaping.
 """
     },
     {
         "id": "v4",
-        "name": "Cryptographic Failures",
-        "key": "v4_crypto",
+        "name": "Insecure Design",
+        "owasp_id": "A04:2021",
+        "key": "v4_insecure_design",
         "output_file": "rv4.md",
         "focus_areas": [
-            "Use of Broken or Deprecated Algorithms (MD5, SHA1, DES, RC4)",
-            "Hardcoded Cryptographic Keys",
-            "Insecure Modes of Operation (ECB mode)",
-            "Predictable Random Number Generators",
-            "Weak Password Hashing"
+            "Missing Security Controls in Design",
+            "Unprotected Storage of Credentials",
+            "Unrestricted File Upload Logic",
+            "Insecure Password Recovery Flows (security questions)",
+            "Lack of Business Logic Rate Limiting",
+            "Trust Boundary Violations"
         ],
         "analysis_instructions": """
-1. Identify use of outdated or weak functions such as MD5, SHA1, DES, or RC4.
-2. Detect secrets, private keys, or default passwords hardcoded in source code.
-3. Spot use of insecure block cipher modes, such as ECB (Electronic Codebook).
-4. Identify use of non-cryptographic PRNGs for security-sensitive tasks.
-5. Detect absence of salts or use of fast hash functions instead of Argon2, scrypt, or PBKDF2.
+1. Identify missing threat modeling and secure design patterns.
+2. Spot logic that saves credentials without appropriate encryption/protection.
+3. Detect file upload functions lacking validation for dangerous extensions/content.
+4. Identify use of security questions for password recovery (insecure by design).
+5. Check for missing rate limits on sensitive operations (bookings, payments, APIs).
+6. Detect where untrusted input directly modifies internal application state.
 """
     },
     {
         "id": "v5",
-        "name": "Injection",
-        "key": "v5_injection",
+        "name": "Security Misconfiguration",
+        "owasp_id": "A05:2021",
+        "key": "v5_misconfig",
         "output_file": "rv5.md",
         "focus_areas": [
-            "Use of String Concatenation in Database Queries",
-            "Direct Execution of OS Commands",
-            "Unsafe ORM Parameterization",
-            "Dynamic SQL in Stored Procedures",
-            "Lack of Context-Aware Escaping or Validation"
+            "Unnecessary features enabled (debug, ports, services)",
+            "Insecure Default Configurations",
+            "Missing or Weak Security Headers",
+            "Hardcoded Default Credentials",
+            "Verbose Error Messages (stack traces, DB errors)",
+            "Permissive Cloud/Storage Access (S3, ports)",
+            "Outdated or unpatched software"
         ],
         "analysis_instructions": """
-1. Identify where user-supplied variables are added directly to query strings (SQL or NoSQL).
-2. Spot instances where raw user input is passed directly into system-level functions.
-3. Detect use of unsanitized data within ORM search parameters.
-4. Identify stored procedures that use dynamic queries built from potentially hostile data.
-5. Detect data flows where "untrusted" input is sent to an interpreter without validation or escaping.
+1. Check for unnecessary features enabled (DEBUG=True, test endpoints, directory listing).
+2. Verify insecure default configurations in frameworks (Django, Spring, Express).
+3. Check for missing security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options).
+4. Detect hardcoded default credentials in configuration files.
+5. Identify verbose error messages exposing stack traces or database structure.
+6. Check for permissive cloud access controls (public S3 buckets, 0.0.0.0/0 rules).
+7. Flag outdated framework/library versions with known vulnerabilities.
 """
     },
     {
         "id": "v6",
-        "name": "Insecure Design",
-        "key": "v6_insecure_design",
+        "name": "Vulnerable and Outdated Components",
+        "owasp_id": "A06:2021",
+        "key": "v6_components",
         "output_file": "rv6.md",
         "focus_areas": [
-            "Unprotected Storage of Credentials",
-            "Unrestricted File Upload Controls",
-            "Insecure Identity Recovery Flows",
-            "Lack of Business Logic Limits",
-            "Trust Boundary Violations"
+            "Use of Unmaintained or Deprecated Libraries",
+            "Dependencies with Known CVEs",
+            "Outdated Framework Versions",
+            "Unsupported Runtime Environments",
+            "Missing Security Patches",
+            "Lack of Dependency Scanning"
         ],
         "analysis_instructions": """
-1. Identify logic that saves sensitive credentials without appropriate protection.
-2. Spot file upload functions that lack validation for dangerous file types.
-3. Detect implementation of "security questions and answers" for password recovery.
-4. Identify sensitive transaction points that do not enforce limits on volume or frequency.
-5. Detect code where untrusted user input is directly assigned to internal session variables.
+1. Identify unmaintained third-party components and libraries.
+2. Check dependencies against vulnerability databases (CVE, NVD, npm audit, safety).
+3. Detect outdated framework versions (Spring, Django, React, etc.).
+4. Check for unsupported runtime environments (EOL Node.js, Python, Java versions).
+5. Review requirements.txt, package.json, pom.xml for version pinning and known vulns.
+6. Verify presence of dependency scanning in CI/CD pipeline.
 """
     },
     {
         "id": "v7",
-        "name": "Authentication Failures",
+        "name": "Identification and Authentication Failures",
+        "owasp_id": "A07:2021",
         "key": "v7_auth_fail",
         "output_file": "rv7.md",
         "focus_areas": [
@@ -155,7 +171,8 @@ OWASP_CATEGORIES = [
     },
     {
         "id": "v8",
-        "name": "Software or Data Integrity Failures",
+        "name": "Software and Data Integrity Failures",
+        "owasp_id": "A08:2021",
         "key": "v8_integrity_fail",
         "output_file": "rv8.md",
         "focus_areas": [
@@ -175,7 +192,8 @@ OWASP_CATEGORIES = [
     },
     {
         "id": "v9",
-        "name": "Security Logging & Alerting Failures",
+        "name": "Security Logging and Monitoring Failures",
+        "owasp_id": "A09:2021",
         "key": "v9_logging_fail",
         "output_file": "rv9.md",
         "focus_areas": [
@@ -196,6 +214,7 @@ OWASP_CATEGORIES = [
     {
         "id": "v10",
         "name": "Server-Side Request Forgery (SSRF)",
+        "owasp_id": "A10:2021",
         "key": "v10_ssrf",
         "output_file": "rv10.md",
         "focus_areas": [

@@ -17,8 +17,8 @@ from utils.Validation import validate_state, sanitize_state_for_logging, log_eve
 from utils.Clonning import clone_node
 from utils.Structfile import generate_repo_structure
 from utils.NodesRefactored import (
-    v1_bac, v2_misconfig, v3_supply_chain, v4_crypto, v5_injection,
-    v6_insecure_design, v7_auth_fail, v8_integrity_fail, v9_logging_fail, v10_ssrf
+    v1_bac, v2_crypto, v3_injection, v4_insecure_design, v5_misconfig,
+    v6_components, v7_auth_fail, v8_integrity_fail, v9_logging_fail, v10_ssrf
 )
 from utils.ToolsRefactored import get_vulnerable_files_from_structure, analyze_code_for_vuln, run_deterministic_scan
 from utils.Reportgen import generate_vapt_report
@@ -45,11 +45,11 @@ def handle_tools(state: VAPTState):
     # Map sender to message buffer key
     mapping = {
         "v1_bac": "v1_msgs",
-        "v2_misconfig": "v2_msgs",
-        "v3_supply_chain": "v3_msgs",
-        "v4_crypto": "v4_msgs",
-        "v5_injection": "v5_msgs",
-        "v6_insecure_design": "v6_msgs",
+        "v2_crypto": "v2_msgs",
+        "v3_injection": "v3_msgs",
+        "v4_insecure_design": "v4_msgs",
+        "v5_misconfig": "v5_msgs",
+        "v6_components": "v6_msgs",
         "v7_auth_fail": "v7_msgs",
         "v8_integrity_fail": "v8_msgs",
         "v9_logging_fail": "v9_msgs",
@@ -108,11 +108,11 @@ def tools_router(state: VAPTState) -> str:
     
     mapping = {
         "v1_bac": "v1",
-        "v2_misconfig": "v2",
-        "v3_supply_chain": "v3",
-        "v4_crypto": "v4",
-        "v5_injection": "v5",
-        "v6_insecure_design": "v6",
+        "v2_crypto": "v2",
+        "v3_injection": "v3",
+        "v4_insecure_design": "v4",
+        "v5_misconfig": "v5",
+        "v6_components": "v6",
         "v7_auth_fail": "v7",
         "v8_integrity_fail": "v8",
         "v9_logging_fail": "v9",
@@ -130,11 +130,11 @@ workflow.add_node("tools", handle_tools)
 workflow.add_node("clone", clone_node)
 workflow.add_node("struct", generate_repo_structure)
 workflow.add_node("v1", v1_bac)
-workflow.add_node("v2", v2_misconfig)
-workflow.add_node("v3", v3_supply_chain)
-workflow.add_node("v4", v4_crypto)
-workflow.add_node("v5", v5_injection)
-workflow.add_node("v6", v6_insecure_design)
+workflow.add_node("v2", v2_crypto)
+workflow.add_node("v3", v3_injection)
+workflow.add_node("v4", v4_insecure_design)
+workflow.add_node("v5", v5_misconfig)
+workflow.add_node("v6", v6_components)
 workflow.add_node("v7", v7_auth_fail)
 workflow.add_node("v8", v8_integrity_fail)
 workflow.add_node("v9", v9_logging_fail)
