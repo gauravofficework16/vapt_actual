@@ -1,0 +1,86 @@
+PROJECT DIRECTORY TREE 
+NOTE: Context restricted to Application Logic. Excluded: Build Artifacts, Static Assets, External Dependencies, and Binaries.
+
+========================
+Root: cloned_code/
+├── .vite
+│   └── deps
+│       ├── _metadata.json
+│       └── package.json
+├── client
+│   ├── .gitignore
+│   ├── App.tsx
+│   ├── README.md
+│   ├── components
+│   │   ├── AIAssistant.tsx
+│   │   ├── AdminPanel.tsx
+│   │   ├── BulkNodeUploadModal.tsx
+│   │   ├── BulkUploadModal.tsx
+│   │   ├── ChangePasswordModal.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── EmployeeAuthDialog.tsx
+│   │   ├── HistoryLog.tsx
+│   │   ├── IssueManager.tsx
+│   │   ├── LoginScreen.tsx
+│   │   ├── MasterIssueLog.tsx
+│   │   ├── ScenarioForm.tsx
+│   │   ├── ScenarioGrid.tsx
+│   │   ├── ScenarioTable.tsx
+│   │   ├── ScriptCommunicationModal.tsx
+│   │   ├── ScriptHistoryModal.tsx
+│   │   ├── SignOffReport.tsx
+│   │   ├── TestExecutionModal.tsx
+│   │   ├── Toast.tsx
+│   │   ├── UATForm.tsx
+│   │   ├── UATPerformance.tsx
+│   │   ├── UATTable.tsx
+│   │   ├── UIComponents.tsx
+│   │   ├── UserForm.tsx
+│   │   └── UserTable.tsx
+│   ├── constants.ts
+│   ├── index.css
+│   ├── index.html
+│   ├── index.tsx
+│   ├── metadata.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── services
+│   │   ├── api.ts
+│   │   ├── constants.ts
+│   │   ├── geminiService.ts
+│   │   ├── pdfGenerator.ts
+│   │   └── types.ts
+│   ├── tsconfig.json
+│   ├── types.ts
+│   ├── vite-env.d.ts
+│   └── vite.config.ts
+└── server
+    ├── .gitignore
+    ├── .python-version
+    ├── README.md
+    ├── config
+    │   ├── __init__.py
+    │   ├── asgi.py
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── wsgi.py
+    ├── main.py
+    ├── manage.py
+    ├── package-lock.json
+    ├── package.json
+    ├── pyproject.toml
+    ├── requirements.txt
+    ├── reset_pass.py
+    ├── seed.py
+    ├── tracker
+    │   ├── __init__.py
+    │   ├── admin.py
+    │   ├── apps.py
+    │   ├── models.py
+    │   ├── serializers.py
+    │   ├── tests.py
+    │   ├── urls.py
+    │   └── views.py
+    ├── uv.lock
+    └── wipe_db.py

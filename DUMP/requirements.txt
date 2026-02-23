@@ -1,0 +1,43 @@
+# streamlit
+# gitpython
+# langgraph
+# semgrep
+# bandit
+# langchain-ollama
+# langchain
+# langchain-core
+# langsmith
+# subprocess
+# shutil
+# langgraph-api
+# langgraph-cli
+
+# UI and Utilities
+streamlit>=1.41.0
+gitpython>=3.1.43
+
+# Core LangChain Ecosystem (LTS v1.0+ as of 2026)
+langchain>=1.0.0
+langchain-core>=1.2.6
+langchain-ollama>=0.2.0
+langsmith>=0.3.0
+
+# LangGraph and Development Server
+# Note: langgraph-api requires Python 3.11+
+langgraph>=1.0.0
+langgraph-cli[inmem]>=0.1.70
+langgraph-api>=0.6.18
+
+# Security and Analysis
+semgrep>=1.98.0
+bandit>=1.8.0
+
+# SSL Certificate Fixes (Crucial for LangSmith Connection)
+certifi>=2025.12.15
+pip-system-certs>=4.0
+fpdf
+langchain_community
+markdown_pdf
+
+
+
