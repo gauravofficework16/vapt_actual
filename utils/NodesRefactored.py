@@ -1,6 +1,7 @@
 """
-Refactored parameterized OWASP vulnerability analysis nodes.
+Refactored parameterized OWASP Top 10:2025 vulnerability analysis nodes.
 Replaces 10 near-duplicate functions with one factory pattern.
+Includes anti-hallucination measures and large file handling.
 """
 import os
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -8,7 +9,7 @@ from langchain_ollama import ChatOllama
 from utils.Agentschema import VAPTState
 from utils.Config import Config
 from utils.OWASPConfig import get_category_config
-from utils.Tools import get_vulnerable_files_from_structure, analyze_code_for_vuln
+from utils.ToolsRefactored import get_vulnerable_files_from_structure, analyze_code_for_vuln
 from utils.Validation import log_event
 
 
@@ -44,39 +45,98 @@ def create_owasp_node(node_id: str):
         messages = state.get(msg_key, [])
         
         vulnerability = category["name"]
+        owasp_id = category["owasp_id"]
         
-        # Build comprehensive system prompt
-        focus_areas_text = "\n".join([f"   - {area}" for area in category["focus_areas"]])
+        # Build comprehensive system prompt with anti-hallucination measures
+        focus_areas_text = "\n".join([f"   {i+1}. {area}" for i, area in enumerate(category["focus_areas"])])
         
         system_prompt = f"""
-You are a Security Engineer specialized in analyzing OWASP vulnerabilities. Your goal is to find the target files for {vulnerability} and analyze them with tools. Create a detailed report of the vulnerability analysis specific for {vulnerability}.
+You are a Security Analyst performing OWASP Top 10:2025 vulnerability assessment.
 
-CRITICAL AREA OF FOCUS:
+CURRENT TASK: Analyze for {owasp_id} - {vulnerability}
+
+CRITICAL INSTRUCTIONS TO PREVENT HALLUCINATION:
+- ONLY report vulnerabilities that exist in ACTUAL CODE you've analyzed via tools
+- DO NOT make up vulnerabilities or guess about code you haven't seen
+- If a file is too large or returns an error, SKIP it and state "File too large to analyze"
+- LIMIT analysis to maximum {Config.MAX_FILES_PER_CATEGORY} most critical files
+- If NO vulnerabilities found after analysis, clearly state: "No {vulnerability} issues detected"
+
+KEY VULNERABILITY PATTERNS TO DETECT:
 {focus_areas_text}
 
-ANALYSIS PLAN:
+DETAILED ANALYSIS GUIDELINES:
 {category["analysis_instructions"]}
 
-TOOL USAGE REQUIREMENTS:
-1. Use 'get_vulnerable_files_from_structure' tool at start (ONLY ONCE) to filter the directory structure from {file_struct_path} and retrieve a list of files relevant to {vulnerability}.
-2. Extract the list of filenames returned by the tool.
-3. Pass these specific filenames into the 'analyze_code_for_vuln' tool ONE BY ONE to retrieve their code content from {repo_path}.
-4. Analyze the code content returned for each file, checking specifically for the patterns defined in the CRITICAL AREA OF FOCUS.
-5. Each file should be analyzed by 'analyze_code_for_vuln' for {vulnerability} ONLY ONCE. Analyze every identified file.
-6. Do NOT hallucinate findings. Only report issues present in the actual code.
+MANDATORY TOOL WORKFLOW:
+Step 1: Call 'get_vulnerable_files_from_structure' ONCE with these inputs:
+   - file_struct_path: {file_struct_path}
+   - vuln_type: "{vulnerability}"
+   
+Step 2: Review the returned file list. Select maximum {Config.MAX_FILES_PER_CATEGORY} most relevant files.
 
-FINAL REPORT FORMAT:
-1. Vulnerability Name: {vulnerability}
-2. Vulnerability Score: [0-10]
-3. Severity: [Low | Medium | High | Critical]
-4. Detailed Technical Analysis:
-   - File Name: [Relative path]
-   - Technical Description: Explain how the vulnerability occurs
-   - Vulnerable Code Snippet: Show the exact code with the issue
-   - Secure Fix: Provide a remediated version with proper security controls
-   - Confidence: [High | Medium | Low] - based on evidence strength
+Step 3: For each selected file, call 'analyze_code_for_vuln' tool:
+   - file_path: [exact filename from structure]
+   - repo_path: {repo_path}
+   - vuln_type: "{vulnerability}"
 
-If NO vulnerabilities are found, clearly state: "No {vulnerability} issues detected in the analyzed codebase."
+Step 4: CAREFULLY analyze the ACTUAL code returned. Look for patterns from KEY VULNERABILITY PATTERNS section above.
+
+Step 5: If file analysis returns "too large" or error, acknowledge and skip that file.
+
+REPORT FORMAT (Only for confirmed vulnerabilities with evidence):
+## {vulnerability} Assessment Report
+
+**OWASP ID:** {owasp_id}  
+**Risk Score:** [0-10 based on severity and exploitability]  
+**Overall Severity:** [Low | Medium | High | Critical]
+
+### Findings Summary
+- Total Files Analyzed: [number]
+- Vulnerable Files Found: [number]
+- False Positives: None (evidence-based analysis)
+
+### Detailed Findings
+
+#### Finding 1: [Specific Vulnerability Name]
+**File:** `[exact/relative/path/to/file]`  
+**Line Numbers:** [if identifiable]  
+**Severity:** [Critical|High|Medium|Low]  
+**Confidence:** [High|Medium|Low]
+
+**Vulnerable Code:**
+```
+[EXACT code snippet from the file showing the vulnerability]
+```
+
+**Vulnerability Explanation:**  
+[Explain WHY this code is vulnerable - what attack is possible]
+
+**Proof of Concept:**  
+[Show how an attacker could exploit it]
+
+**Recommended Fix:**
+```
+[ACTUAL fixed code with security controls]
+```
+
+**References:**  
+- OWASP: https://owasp.org/Top10/{owasp_id.replace(':', '/')}
+
+---
+
+[Repeat for each distinct finding]
+
+### Conclusion
+[Summary of overall security posture for this category]
+
+---
+
+IF NO VULNERABILITIES: State clearly:
+# {vulnerability} Assessment Report
+**OWASP ID:** {owasp_id}  
+**Status:** ✅ No {vulnerability} vulnerabilities detected in the analyzed codebase.
+**Files Analyzed:** [count]
 """
         
         # Prepare input messages
@@ -121,14 +181,15 @@ If NO vulnerabilities are found, clearly state: "No {vulnerability} issues detec
     return node_handler
 
 
-# ==================== Create All 10 OWASP Nodes ====================
-v1_bac = create_owasp_node("v1")
-v2_crypto = create_owasp_node("v2")
-v3_injection = create_owasp_node("v3")
-v4_insecure_design = create_owasp_node("v4")
-v5_misconfig = create_owasp_node("v5")
-v6_components = create_owasp_node("v6")
-v7_auth_fail = create_owasp_node("v7")
-v8_integrity_fail = create_owasp_node("v8")
-v9_logging_fail = create_owasp_node("v9")
-v10_ssrf = create_owasp_node("v10")
+# ==================== Create All 10 OWASP Top 10:2025 Nodes ====================
+v1_bac = create_owasp_node("v1")                           # A01:2025 - Broken Access Control
+v2_misconfig = create_owasp_node("v2")                     # A02:2025 - Security Misconfiguration
+v3_supply_chain = create_owasp_node("v3")                  # A03:2025 - Software Supply Chain Failures
+v4_crypto = create_owasp_node("v4")                        # A04:2025 - Cryptographic Failures
+v5_injection = create_owasp_node("v5")                     # A05:2025 - Injection
+v6_insecure_design = create_owasp_node("v6")               # A06:2025 - Insecure Design
+v7_auth_fail = create_owasp_node("v7")                     # A07:2025 - Authentication Failures
+v8_integrity_fail = create_owasp_node("v8")                # A08:2025 - Software/Data Integrity Failures
+v9_logging_fail = create_owasp_node("v9")                  # A09:2025 - Security Logging/Alerting Failures
+v10_exception_mishandle = create_owasp_node("v10")         # A10:2025 - Mishandling of Exceptional Conditions
+

@@ -209,25 +209,43 @@ def analyze_code_for_vuln(file_path: str, vulnerability: str, full_repo_path: st
         with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
             code = f.read()
         
-        # Handle large files with intelligent truncation
+        # Handle large files - CRITICAL for preventing context overflow with gpt-oss:20b
         original_length = len(code)
         if len(code) > Config.MAX_FILE_SIZE_CHARS:
+            # Return early warning for excessively large files
+            if len(code) > Config.MAX_FILE_SIZE_CHARS * 2:
+                return json.dumps({
+                    "file": file_path,
+                    "error": f"FILE TOO LARGE: {original_length} chars (max: {Config.MAX_FILE_SIZE_CHARS}). Skipping to prevent hallucination.",
+                    "vulnerable": False,
+                    "analysis": "File size exceeds safe analysis limits. Manual review recommended.",
+                    "skipped": True
+                })
+            
+            # Intelligent truncation for moderately large files
             code = code[:Config.MAX_FILE_SIZE_CHARS]
-            truncation_note = f"\n...[FILE TRUNCATED: {original_length} → {Config.MAX_FILE_SIZE_CHARS} chars]"
+            truncation_note = f"\n\n⚠️ [TRUNCATED: Original {original_length} chars → Showing first {Config.MAX_FILE_SIZE_CHARS} chars]"
         else:
             truncation_note = ""
         
-        # Build analysis prompt
+        # Build analysis prompt with anti-hallucination measures
         prompt = (
-            f"You are a senior Vulnerability Assessor. Analyze the following code for: {vulnerability}.\n"
-            f"File: {file_path}\n\n"
-            f"Source Code:\n{code}{truncation_note}\n\n"
-            f"Instructions:\n"
-            f"1. Analyze the code deeply for {vulnerability}. Do NOT hallucinate.\n"
-            f"2. If VULNERABLE: Explain the flaw, provide line numbers, and suggest a secure fix.\n"
-            f"3. Analysis must contain exact code snippets showing the vulnerability.\n"
-            f"4. If SAFE: state 'No issues found regarding {vulnerability}'.\n"
-            f"5. Return response in clear technical language with code examples.\n"
+            f"Security Code Review Task:\n"
+            f"Analyze this code for: {vulnerability}\n\n"
+            f"File Path: {file_path}\n"
+            f"File Size: {original_length} characters{' (TRUNCATED)' if truncation_note else ''}\n\n"
+            f"```\n{code}{truncation_note}\n```\n\n"
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. ONLY analyze the ACTUAL code shown above - DO NOT make assumptions about missing code\n"
+            f"2. If you find a vulnerability, provide:\n"
+            f"   - Exact line numbers or code snippet showing the flaw\n"
+            f"   - Clear explanation of WHY it's vulnerable\n"
+            f"   - Specific attack scenario\n"
+            f"   - Concrete fix with code example\n"
+            f"3. If NO vulnerability exists, state: 'No {vulnerability} issues detected in this file.'\n"
+            f"4. DO NOT hallucinate vulnerabilities that don't exist in the code\n"
+            f"5. If file is truncated and you can't determine security, state: 'Incomplete analysis due to truncation'\n\n"
+            f"Analysis:\n"
         )
         
         response = llm.invoke([HumanMessage(content=prompt)])

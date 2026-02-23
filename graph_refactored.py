@@ -17,12 +17,11 @@ from utils.Validation import validate_state, sanitize_state_for_logging, log_eve
 from utils.Clonning import clone_node
 from utils.Structfile import generate_repo_structure
 from utils.NodesRefactored import (
-    v1_bac, v2_crypto, v3_injection, v4_insecure_design, v5_misconfig,
-    v6_components, v7_auth_fail, v8_integrity_fail, v9_logging_fail, v10_ssrf
+    v1_bac, v2_misconfig, v3_supply_chain, v4_crypto, v5_injection,
+    v6_insecure_design, v7_auth_fail, v8_integrity_fail, v9_logging_fail, v10_exception_mishandle
 )
 from utils.ToolsRefactored import get_vulnerable_files_from_structure, analyze_code_for_vuln, run_deterministic_scan
 from utils.Reportgen import generate_vapt_report
-from utils.Push import push_vapt_report_to_git
 
 
 # ==================== Setup ====================
@@ -45,15 +44,15 @@ def handle_tools(state: VAPTState):
     # Map sender to message buffer key
     mapping = {
         "v1_bac": "v1_msgs",
-        "v2_crypto": "v2_msgs",
-        "v3_injection": "v3_msgs",
-        "v4_insecure_design": "v4_msgs",
-        "v5_misconfig": "v5_msgs",
-        "v6_components": "v6_msgs",
+        "v2_misconfig": "v2_msgs",
+        "v3_supply_chain": "v3_msgs",
+        "v4_crypto": "v4_msgs",
+        "v5_injection": "v5_msgs",
+        "v6_insecure_design": "v6_msgs",
         "v7_auth_fail": "v7_msgs",
         "v8_integrity_fail": "v8_msgs",
         "v9_logging_fail": "v9_msgs",
-        "v10_ssrf": "v10_msgs"
+        "v10_exception_mishandle": "v10_msgs"
     }
     
     target_key = mapping.get(sender, "messages")
@@ -90,7 +89,7 @@ def router(state: VAPTState) -> Literal["tools", "next"]:
         "v7_auth_fail": "v7_msgs",
         "v8_integrity_fail": "v8_msgs",
         "v9_logging_fail": "v9_msgs",
-        "v10_ssrf": "v10_msgs"
+        "v10_exception_mishandle": "v10_msgs"
     }
     
     target_key = mapping.get(sender, "messages")
@@ -108,15 +107,15 @@ def tools_router(state: VAPTState) -> str:
     
     mapping = {
         "v1_bac": "v1",
-        "v2_crypto": "v2",
-        "v3_injection": "v3",
-        "v4_insecure_design": "v4",
-        "v5_misconfig": "v5",
-        "v6_components": "v6",
+        "v2_misconfig": "v2",
+        "v3_supply_chain": "v3",
+        "v4_crypto": "v4",
+        "v5_injection": "v5",
+        "v6_insecure_design": "v6",
         "v7_auth_fail": "v7",
         "v8_integrity_fail": "v8",
         "v9_logging_fail": "v9",
-        "v10_ssrf": "v10"
+        "v10_exception_mishandle": "v10"
     }
     
     return mapping.get(sender, END)
@@ -130,17 +129,16 @@ workflow.add_node("tools", handle_tools)
 workflow.add_node("clone", clone_node)
 workflow.add_node("struct", generate_repo_structure)
 workflow.add_node("v1", v1_bac)
-workflow.add_node("v2", v2_crypto)
-workflow.add_node("v3", v3_injection)
-workflow.add_node("v4", v4_insecure_design)
-workflow.add_node("v5", v5_misconfig)
-workflow.add_node("v6", v6_components)
+workflow.add_node("v2", v2_misconfig)
+workflow.add_node("v3", v3_supply_chain)
+workflow.add_node("v4", v4_crypto)
+workflow.add_node("v5", v5_injection)
+workflow.add_node("v6", v6_insecure_design)
 workflow.add_node("v7", v7_auth_fail)
 workflow.add_node("v8", v8_integrity_fail)
 workflow.add_node("v9", v9_logging_fail)
-workflow.add_node("v10", v10_ssrf)
+workflow.add_node("v10", v10_exception_mishandle)
 workflow.add_node("generate_vapt_report", generate_vapt_report)
-workflow.add_node("push_to_git", push_vapt_report_to_git)
 
 # Set entry point
 workflow.set_entry_point("clone")
@@ -161,9 +159,8 @@ workflow.add_conditional_edges("v8", router, {"tools": "tools", "next": "v9"})
 workflow.add_conditional_edges("v9", router, {"tools": "tools", "next": "v10"})
 workflow.add_conditional_edges("v10", router, {"tools": "tools", "next": "generate_vapt_report"})
 
-# Add final edges
-workflow.add_edge("generate_vapt_report", "push_to_git")
-workflow.add_edge("push_to_git", END)
+# Add final edge - save PDF and end
+workflow.add_edge("generate_vapt_report", END)
 
 # Tool return routing
 workflow.add_conditional_edges(

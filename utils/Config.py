@@ -44,8 +44,9 @@ class Config:
     AUDIT_LOG_PATH: Path = WORKSPACE_ROOT / "vapt_audit.log"
     
     # ==================== Analysis Settings ====================
-    MAX_FILE_SIZE_CHARS: int = 10000  # Increased from 8000
-    MAX_FILES_PER_CATEGORY: int = 10
+    MAX_FILE_SIZE_CHARS: int = 8000  # Prevent context overflow for gpt-oss:20b (reduce from 10000)
+    MAX_FILES_PER_CATEGORY: int = 8  # Limit files per analysis to prevent hallucination
+    CHUNK_SIZE_CHARS: int = 7000  # Size for chunking large files
     ENABLE_SEMGREP: bool = os.getenv("ENABLE_SEMGREP", "false").lower() == "true"
     ENABLE_BANDIT: bool = os.getenv("ENABLE_BANDIT", "false").lower() == "true"
     
