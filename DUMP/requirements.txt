@@ -1,17 +1,3 @@
-# streamlit
-# gitpython
-# langgraph
-# semgrep
-# bandit
-# langchain-ollama
-# langchain
-# langchain-core
-# langsmith
-# subprocess
-# shutil
-# langgraph-api
-# langgraph-cli
-
 # UI and Utilities
 streamlit>=1.41.0
 gitpython>=3.1.43
@@ -35,9 +21,19 @@ bandit>=1.8.0
 # SSL Certificate Fixes (Crucial for LangSmith Connection)
 certifi>=2025.12.15
 pip-system-certs>=4.0
+
+# Report Generation
 fpdf
-langchain_community
 markdown_pdf
+markdown2
+weasyprint
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# Additional LangChain Components
+langchain_community
+
 
 
 

@@ -4,15 +4,15 @@ from langchain_core.messages import BaseMessage
 
 class VAPTState(TypedDict):
     repo_url: str
-    branch_name:str
+    branch_name: str
     repo_path: str
     access_token: str
-    node_results: str
-    final_report:str
-    file_struct_path:str
-    tech_stack:List[str]
+    node_results: str  # Path to Node_results directory (required by report generator)
+    final_report: str
+    file_struct_path: str
+    tech_stack: List[str]
     messages: Annotated[List[BaseMessage], add]
-    sender:str
+    sender: str
     v1_msgs: Annotated[List[BaseMessage], add]
     v2_msgs: Annotated[List[BaseMessage], add]
     v3_msgs: Annotated[List[BaseMessage], add]

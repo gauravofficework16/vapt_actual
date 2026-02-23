@@ -1,3 +1,29 @@
+# Environment and secrets
 .env
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Runtime artifacts
+cloned_code/
+Node_results/
+VAPT_Final_Report.pdf
+vapt_audit.log
+repo_structure.txt
+
+# LangGraph state
+.langgraph_api/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
